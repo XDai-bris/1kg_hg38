@@ -5,6 +5,8 @@ cwd="/Users/xd14188/Desktop/UoB/1kg_hg38"
 vcf_dir="${cwd}/vcfFiles"
 sample_dir="${cwd}/sampleName"
 populations=("EUR" "AFR" "EAS" "SAS" "AMR")
+# here to choose to use dbSNP v157 hg38 or dbSNP v137 hg38 with biallelic and rs ID valid SNPs
+dbSNPv157_hg38_dir="/Users/xd14188/Desktop/UoB/tools/genomeRef/dbSNPv157_hg38/dbsnp157_biallelic_rs_hg38.bed"
 
 # Create output directories
 mkdir -p "${cwd}/tmp_vcf_sampleName"
@@ -45,7 +47,12 @@ for chr in {1..2}; do
         comm -23 <(sort "$sample_list") <(sort "$vcf_sample_list") > "$not_in_vcf"
 
         # Extract population samples (ignore missing with --force-samples)
-        bcftools view -S "$sample_list" --force-samples -Oz -o "$vcf_out" "$vcf_file"
+        # Use bcftools to filter VCF by sample list and bed file from dbSNP v137 hg38
+        # Note: Adjust the path to your dbSNP BED file as needed
+        echo "Extracting samples for chr$chr $pop..."
+        bcftools view -S "$sample_list" --force-samples "$vcf_file" \
+        | bcftools view -R "$dbSNPv157_hg38_dir" \
+        -Oz -o "$vcf_out"
 
         # Unzip VCF for PLINK v1.9
         gunzip -f "$vcf_out"
