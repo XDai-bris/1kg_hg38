@@ -2,8 +2,8 @@
 notInVcfSample
 bedFiles_maf001
 tmp_vcf_sampleName
-vcfFiles
-!vcfFiles\check_md5.sh
+vcfFiles/*
+!vcfFiles/check_md5.sh
 !vcfFiles/20220804_manifest.txt
 .Rhistory
 .DS_Store
