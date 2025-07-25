@@ -1,20 +1,25 @@
 #!/bin/bash
 
-# Set working directory
+# Set working directory and input paths
 cwd="/Users/xd14188/Desktop/UoB/1kg_hg38"
 vcf_dir="${cwd}/vcfFiles"
 sample_dir="${cwd}/sampleName"
-populations=("EUR" "AFR" "EAS" "SAS" "AMR")
-# here to choose to use dbSNP v157 hg38 or dbSNP v137 hg38 with biallelic and rs ID valid SNPs
-dbSNPv157_hg38_dir="/Users/xd14188/Desktop/UoB/tools/genomeRef/dbSNPv157_hg38/dbsnp157_biallelic_rs_hg38.bed"
+vcf_pop_dir="${cwd}/vcfPops"
 
-# Create output directories
+# Choose dbSNP version (must be a BED with biallelic rsID SNVs)
+dbSNPv157_bed="/Users/xd14188/Desktop/UoB/tools/genomeRef/dbSNPv157_hg38/dbsnp157_biallelic_rs_hg38.bed"
+
+# Populations
+populations=("EUR" "AFR" "EAS" "SAS" "AMR")
+
+# Create output directories if missing
 mkdir -p "${cwd}/tmp_vcf_sampleName"
 mkdir -p "${cwd}/notInVcfSample"
 mkdir -p "${cwd}/bedFiles_maf001"
+mkdir -p "${vcf_pop_dir}"
 
 # Loop through chromosomes 1 to 22
-for chr in {1..2}; do
+for chr in {1..22}; do
     echo "=== Processing chromosome $chr ==="
     vcf_file="${vcf_dir}/1kGP_high_coverage_Illumina.chr${chr}.filtered.SNV_INDEL_SV_phased_panel.vcf.gz"
     vcf_sample_list="${cwd}/tmp_vcf_sampleName/chr${chr}_vcf_samples.txt"
@@ -34,7 +39,8 @@ for chr in {1..2}; do
 
         sample_list="${sample_dir}/sampleName_${pop}.txt"
         not_in_vcf="${cwd}/notInVcfSample/chr${chr}_notInVcfSample_${pop}.txt"
-        vcf_out="${vcf_dir}/chr${chr}_${pop}_only.vcf.gz"
+        vcf_out="${vcf_pop_dir}/chr${chr}_${pop}_only.vcf.gz"
+        vcf_unzipped="${vcf_pop_dir}/chr${chr}_${pop}_only.vcf"
         bed_prefix="${cwd}/bedFiles_maf001/chr${chr}_${pop}_MAF01"
 
         # Check if sample list exists
@@ -43,26 +49,28 @@ for chr in {1..2}; do
             continue
         fi
 
-        # Identify population samples not in VCF and save list
+        # Identify missing samples and log them
         comm -23 <(sort "$sample_list") <(sort "$vcf_sample_list") > "$not_in_vcf"
 
-        # Extract population samples (ignore missing with --force-samples)
-        # Use bcftools to filter VCF by sample list and bed file from dbSNP v137 hg38
-        # Note: Adjust the path to your dbSNP BED file as needed
-        echo "Extracting samples for chr$chr $pop..."
+        # Remove any existing conflicting output
+        rm -f "$vcf_out" "$vcf_unzipped"
+
+        # Extract samples and filter by dbSNP
+        echo "Extracting and filtering for chr$chr $pop..."
         bcftools view -S "$sample_list" --force-samples "$vcf_file" \
-        | bcftools view -R "$dbSNPv157_hg38_dir" \
-        -Oz -o "$vcf_out"
+        | bcftools view -R "$dbSNPv157_bed" -Oz -o "$vcf_out"
 
-        # Unzip VCF for PLINK v1.9
+        # Unzip the VCF for PLINK (plink v1.9 doesn't accept .vcf.gz)
         gunzip -f "$vcf_out"
-        vcf_unzipped="${vcf_out%.gz}"
 
-        # Convert to BED and filter by MAF > 0.01
+        # Convert to PLINK and filter by MAF > 0.01
         plink --vcf "$vcf_unzipped" --make-bed --maf 0.01 --out "$bed_prefix"
+
+        # Clean up intermediate VCF
+        rm -f "$vcf_unzipped"
 
         echo "--- Done: chr$chr $pop ---"
     done
 done
 
-echo "✅ All chromosomes and populations processed."
+echo "✅ All chromosomes and populations processed successfully."

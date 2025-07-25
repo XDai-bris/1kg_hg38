@@ -7,3 +7,5 @@ vcfFiles/*
 !vcfFiles/20220804_manifest.txt
 .Rhistory
 .DS_Store
+vcfPops/*
+test.sh

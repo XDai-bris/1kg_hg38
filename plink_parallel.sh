@@ -50,7 +50,9 @@ process_chr_pop() {
   vcf_sample_list="${cwd}/tmp_vcf_sampleName/chr${chr}_vcf_samples.txt"
   not_in_vcf="${cwd}/notInVcfSample/chr${chr}_notInVcfSample_${pop}.txt"
   vcf_out="${cwd}/vcfPops/chr${chr}_${pop}_only.vcf.gz"
+  vcf_unzipped="${cwd}/vcfPops/chr${chr}_${pop}_only.vcf"
   bed_prefix="${cwd}/bedFiles_maf001/chr${chr}_${pop}_MAF01"
+
   if [[ ! -f "$sample_list" || ! -f "$vcf_file" ]]; then
     echo "❌ Missing file for chr${chr} $pop ❌"
     return
@@ -60,12 +62,11 @@ process_chr_pop() {
     # Extract population samples (ignore missing with --force-samples)
     # Use bcftools to filter VCF by sample list and bed file from dbSNP v137 hg38
     # Note: Adjust the path to your dbSNP BED file as needed
-    echo "Extracting samples for chr$chr $pop..."
-    bcftools view -S "$sample_list" --force-samples "$vcf_file" \
-    | bcftools view -R "$dbSNPv157_hg38_dir" \
-    -Oz -o "$vcf_out"
+  echo "Extracting samples for chr$chr $pop..."
+  bcftools view -S "$sample_list" --force-samples "$vcf_file" \
+  | bcftools view -R "$dbSNPv157_hg38_dir" \
+  -Oz -o "$vcf_out"
   gunzip -k "$vcf_out"
-  vcf_unzipped="${vcf_out%.gz}"# 
   plink --vcf "$vcf_unzipped" --make-bed --maf 0.01 --out "$bed_prefix"
   rm "$vcf_unzipped"  # Clean up unzipped VCF
 }
@@ -73,4 +74,4 @@ process_chr_pop() {
 export -f process_chr_pop
 
 # Run the jobs in parallel: 4 concurrent tasks
-parallel -j 3 process_chr_pop ::: {1..22} ::: EUR AFR EAS SAS AMR
+parallel -j 3 process_chr_pop ::: {1..1} ::: EUR AFR EAS SAS AMR
