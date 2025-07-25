@@ -1,25 +1,25 @@
 #!/bin/bash
 
 # Set working directory and input paths
-cwd="/Users/xd14188/Desktop/UoB/1kg_hg38"
+cwd="/Users/xd14188/Desktop/UoB/1kg_hg38/"
 vcf_dir="${cwd}/vcfFiles"
 sample_dir="${cwd}/sampleName"
+dbSNPv157_pos="/Users/xd14188/Desktop/UoB/tools/genomeRef/dbSNPv157_hg38/dbsnp157_biallelic_rs_hg38_UCSC.tab"
+populations=("EUR")
+
 vcf_pop_dir="${cwd}/vcfPops"
-
-# Choose dbSNP version (must be a BED with biallelic rsID SNVs)
-dbSNPv157_bed="/Users/xd14188/Desktop/UoB/tools/genomeRef/dbSNPv157_hg38/dbsnp157_biallelic_rs_hg38.bed"
-
-# Populations
-populations=("EUR" "AFR" "EAS" "SAS" "AMR")
-
 # Create output directories if missing
 mkdir -p "${cwd}/tmp_vcf_sampleName"
 mkdir -p "${cwd}/notInVcfSample"
 mkdir -p "${cwd}/bedFiles_maf001"
 mkdir -p "${vcf_pop_dir}"
 
-# Loop through chromosomes 1 to 22
-for chr in {1..22}; do
+
+
+
+
+# seprate by population and filter with MAF > 0.01
+for chr in {1..22,x}; do
     echo "=== Processing chromosome $chr ==="
     vcf_file="${vcf_dir}/1kGP_high_coverage_Illumina.chr${chr}.filtered.SNV_INDEL_SV_phased_panel.vcf.gz"
     vcf_sample_list="${cwd}/tmp_vcf_sampleName/chr${chr}_vcf_samples.txt"
@@ -39,8 +39,10 @@ for chr in {1..22}; do
 
         sample_list="${sample_dir}/sampleName_${pop}.txt"
         not_in_vcf="${cwd}/notInVcfSample/chr${chr}_notInVcfSample_${pop}.txt"
-        vcf_out="${vcf_pop_dir}/chr${chr}_${pop}_only.vcf.gz"
-        vcf_unzipped="${vcf_pop_dir}/chr${chr}_${pop}_only.vcf"
+        vcf_pop_out="${vcf_pop_dir}/chr${chr}_${pop}_only.vcf.gz"
+        vcf_var_out="${vcf_pop_dir}/chr${chr}_${pop}_only_varList.tab"
+        flt_var_out="${vcf_pop_dir}/chr${chr}_${pop}_only_varList_filtered.tab"
+        vcf_flt_out="${vcf_pop_dir}/chr${chr}_${pop}_only_filtered_SNP.vc.gz"
         bed_prefix="${cwd}/bedFiles_maf001/chr${chr}_${pop}_MAF01"
 
         # Check if sample list exists
@@ -52,25 +54,28 @@ for chr in {1..22}; do
         # Identify missing samples and log them
         comm -23 <(sort "$sample_list") <(sort "$vcf_sample_list") > "$not_in_vcf"
 
-        # Remove any existing conflicting output
-        rm -f "$vcf_out" "$vcf_unzipped"
-
         # Extract samples and filter by dbSNP
         echo "Extracting and filtering for chr$chr $pop..."
-        bcftools view -S "$sample_list" --force-samples "$vcf_file" \
-        | bcftools view -R "$dbSNPv157_bed" -Oz -o "$vcf_out"
+        bcftools view -S "$sample_list" --force-samples "$vcf_file" -Ou | \
+        bcftools +fill-tags -Ou -- -t MAF | \
+        bcftools view -i 'MAF>0.01' -Oz -o "$vcf_pop_out"
+        bcftools index "$vcf_pop_out"
+        echo "--- Done: chr$chr $pop  population Sep and MAF Cal ---"
 
-        # Unzip the VCF for PLINK (plink v1.9 doesn't accept .vcf.gz)
-        gunzip -f "$vcf_out"
-
-        # Convert to PLINK and filter by MAF > 0.01
-        plink --vcf "$vcf_unzipped" --make-bed --maf 0.01 --out "$bed_prefix"
-
-        # Clean up intermediate VCF
-        rm -f "$vcf_unzipped"
-
+        # make the "$vcf_pop_out" sample variants list
+        bcftools query -f '%CHROM\t%POS\n' "$vcf_pop_out" > "$vcf_var_out"
+        # compare the variants in the vcf file with the dbSNP v157 hg38 position tab file
+        LC_ALL=C awk 'NR==FNR{a[$1 FS $2];next} ($1 FS $2) in a' \
+        "$vcf_var_out" "$dbSNPv157_pos" > "$flt_var_out"
+        echo "--- Done: chr$chr $pop  SNPs check in dbSNPv157 ---"
+        
+        # filter "$vcf_out" variants with the dbSNP v157 hg38 matched variants list "$flt_var_out"
+        bcftools view -R "$flt_var_out" -Oz -o "$vcf_flt_out" "$vcf_pop_out"
         echo "--- Done: chr$chr $pop ---"
+        
+        # Clean up intermediate VCF
+        # rm -f "$vcf_unzipped"
+
+        echo "-------------------------"
     done
 done
-
-echo "✅ All chromosomes and populations processed successfully."

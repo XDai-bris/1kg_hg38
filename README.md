@@ -9,12 +9,12 @@ This script is designed to automate the extraction and filtering of 1000 Genomes
 ```
 tools/genomeRef/            # Reference files (e.g., dbSNPv157_hg38)
 1kg_hg38/
-├── vcfFiles/               # Input: VCF files (chr1..22)
+├── vcfFiles/               # Input: VCF files (chr1..22,X)
 ├── sampleName/             # Input: Sample lists per population (e.g., sampleName_EUR.txt)
 ├── tmp_vcf_sampleName/     # Temp: Sample names extracted from VCFs
 ├── notInVcfSample/         # Output: Samples missing from VCFs
-├── bedFiles_maf001/        # Output: Population-filtered BED files with MAF > 0.01
-├── vcfPops/                # Output: Population-filtered VCFs
+├── bedFiles_maf001/        # Output: Final Merged Population-filtered Variates-verified BED files
+├── vcfPops/                # Output: Population-filtered Variates-verified VCFs for each Chr
 ```
 
 ---
@@ -37,19 +37,19 @@ Make sure the following tools are installed and available in your environment:
 - **Sample Lists:**  
   One per population (e.g., `sampleName_EUR.txt`, `sampleName_AFR.txt`) stored in `sampleName/`.
     this should be prepared, details see README.md in `sampleName/`
-- **dbSNP v157 hg38 BED file:**  
-  Located at `tools/genomeRef/dbSNPv157_hg38/dbsnp157_biallelic_rs_hg38.bed`. Used for SNP filtering.
+- **dbSNP v157 hg38 TAB file:**  
+  Located at `tools/genomeRef/dbSNPv157_hg38/dbsnp157_biallelic_rs_hg38_UCSC.tab`. Used for SNP filtering.
     this should be prepared, details see README.md in `tools/genomeRef/dbSNPv157_hg38/`
 ---
 
 ## ⚙️ What It Does
 
 1. **Extracts sample names** from VCFs for each chromosome (1–22, X).
-2. **Verifies consistency** of sample names across each chromosomes vcf.gz files(using chr1 as reference).
-3. **Filters VCF files**:
+2. **Filters VCF files**:
    - Keeps only samples for a given population.
-   - Filters variants based on dbSNP BED file.
-   - Outputs compressed VCFs and PLINK BED files with MAF > 0.01.
+   - Filter samples, compute MAF, and extract variants with MAF > 0.01.
+   - Outputs compressed VCFs and extrac variants location list for verified.
+3. **Verifies consistency** of variants in dbSNPv157_hg38(generate verifed SNP list) and results in filter.vcf.gz. 
 4. **Parallel processing** of chromosomes and populations (via GNU `parallel`).
 
 ---
@@ -58,7 +58,6 @@ Make sure the following tools are installed and available in your environment:
     select suitable parallel -j 3 at end of `plink_parallel.sh`
     chmod +x plink_parallel.sh
     ./plink_parallel.sh
-
 ---
 
 ## 🌍 Supported Populations
@@ -72,20 +71,18 @@ Make sure the following tools are installed and available in your environment:
 ---
 
 ## 📌 Notes
-
-- The script currently only processes **chr1** for testing. To process all chromosomes, update:
-  ```bash
-  parallel -j 3 process_chr_pop ::: {1..22} ::: EUR AFR EAS SAS AMR
-  ```
 - Make sure your `sampleName_*.txt` files contain sample IDs matching those in the VCF files.
 - There are some samples are not in Vcf but in the different sampleName_Pop
 ---
 
 ## 📤 Output
 
-- `vcfPops/chr<chr>_<pop>_only.vcf.gz` – population-specific, dbSNP-filtered VCFs.
-- `bedFiles_maf001/chr<chr>_<pop>_MAF01.*` – PLINK-formatted genotype data for MAF > 0.01.
+- `vcfPops/chr<chr>_<pop>_only.vcf.gz` – population-specific.
+- `vcfPops/chr<chr>_<pop>_only_varList.tab` - variant in population-specific vcf.
+- `vcfPops/chr<chr>_<pop>_only_varList_filtered.tab` - variant verifed with dbSNPv157_hg38.
+- `vcfPops/chr<chr>_<pop>_only_filtered_SNP.vc.gz` - population-specific, dbSNP-filtered VCFs.
 - `notInVcfSample/*` - Samples in different sampleName_Pop but can not be found in chr1..22,X Vcf file in `vcfFiles/`
+- `merged bed file` -
 ---
 
 
