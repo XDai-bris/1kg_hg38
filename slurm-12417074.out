@@ -1,0 +1,139 @@
+/software/spack/linux-rocky8-broadwell/gcc-12.3.0/bcftools-1.19-2333/bin/bcftools
+bcftools 1.19
+Using htslib 1.19.1
+Copyright (C) 2023 Genome Research Ltd.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+/usr/bin/parallel
+🚀 Starting parallel processing...
+🔄 Merging AMR...
+✅ Done: /user/home/xd14188/repo/1kg_hg38/mergedPopVcf/AMR_merged.vcf.gz
+Checking the headers and starting positions of 23 files
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr1_AMR_only_filtered_SNP.vcf.gz	90.159822 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr2_AMR_only_filtered_SNP.vcf.gz	96.140822 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr3_AMR_only_filtered_SNP.vcf.gz	83.164669 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr4_AMR_only_filtered_SNP.vcf.gz	81.613933 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr5_AMR_only_filtered_SNP.vcf.gz	74.493709 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr6_AMR_only_filtered_SNP.vcf.gz	77.224885 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr7_AMR_only_filtered_SNP.vcf.gz	68.345117 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr8_AMR_only_filtered_SNP.vcf.gz	61.007513 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr9_AMR_only_filtered_SNP.vcf.gz	51.804150 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr10_AMR_only_filtered_SNP.vcf.gz	60.921199 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr11_AMR_only_filtered_SNP.vcf.gz	56.028787 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr12_AMR_only_filtered_SNP.vcf.gz	55.818608 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr13_AMR_only_filtered_SNP.vcf.gz	42.375943 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr14_AMR_only_filtered_SNP.vcf.gz	38.429833 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr15_AMR_only_filtered_SNP.vcf.gz	34.631202 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr16_AMR_only_filtered_SNP.vcf.gz	33.849621 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr17_AMR_only_filtered_SNP.vcf.gz	31.613179 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr18_AMR_only_filtered_SNP.vcf.gz	33.913433 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr19_AMR_only_filtered_SNP.vcf.gz	25.935878 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr20_AMR_only_filtered_SNP.vcf.gz	27.131352 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr21_AMR_only_filtered_SNP.vcf.gz	16.926828 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr22_AMR_only_filtered_SNP.vcf.gz	16.803308 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chrX_AMR_only_filtered_SNP.vcf.gz	51.161680 seconds
+🔄 Merging EAS...
+✅ Done: /user/home/xd14188/repo/1kg_hg38/mergedPopVcf/EAS_merged.vcf.gz
+Checking the headers and starting positions of 23 files
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr1_EAS_only_filtered_SNP.vcf.gz	97.831582 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr2_EAS_only_filtered_SNP.vcf.gz	100.196366 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr3_EAS_only_filtered_SNP.vcf.gz	88.450422 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr4_EAS_only_filtered_SNP.vcf.gz	88.381949 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr5_EAS_only_filtered_SNP.vcf.gz	77.642191 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr6_EAS_only_filtered_SNP.vcf.gz	84.675524 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr7_EAS_only_filtered_SNP.vcf.gz	73.534793 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr8_EAS_only_filtered_SNP.vcf.gz	62.678935 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr9_EAS_only_filtered_SNP.vcf.gz	56.178965 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr10_EAS_only_filtered_SNP.vcf.gz	64.330662 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr11_EAS_only_filtered_SNP.vcf.gz	59.411331 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr12_EAS_only_filtered_SNP.vcf.gz	60.035697 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr13_EAS_only_filtered_SNP.vcf.gz	45.563633 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr14_EAS_only_filtered_SNP.vcf.gz	41.490737 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr15_EAS_only_filtered_SNP.vcf.gz	37.806551 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr16_EAS_only_filtered_SNP.vcf.gz	35.946345 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr17_EAS_only_filtered_SNP.vcf.gz	32.905018 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr18_EAS_only_filtered_SNP.vcf.gz	36.033530 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr19_EAS_only_filtered_SNP.vcf.gz	27.266483 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr20_EAS_only_filtered_SNP.vcf.gz	27.676094 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr21_EAS_only_filtered_SNP.vcf.gz	18.209659 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr22_EAS_only_filtered_SNP.vcf.gz	18.217213 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chrX_EAS_only_filtered_SNP.vcf.gz	44.335825 seconds
+🔄 Merging EUR...
+✅ Done: /user/home/xd14188/repo/1kg_hg38/mergedPopVcf/EUR_merged.vcf.gz
+Checking the headers and starting positions of 23 files
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr1_EUR_only_filtered_SNP.vcf.gz	107.843701 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr2_EUR_only_filtered_SNP.vcf.gz	116.011463 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr3_EUR_only_filtered_SNP.vcf.gz	98.557433 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr4_EUR_only_filtered_SNP.vcf.gz	99.185271 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr5_EUR_only_filtered_SNP.vcf.gz	90.448613 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr6_EUR_only_filtered_SNP.vcf.gz	94.010507 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr7_EUR_only_filtered_SNP.vcf.gz	82.559573 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr8_EUR_only_filtered_SNP.vcf.gz	72.309911 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr9_EUR_only_filtered_SNP.vcf.gz	62.030859 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr10_EUR_only_filtered_SNP.vcf.gz	72.569392 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr11_EUR_only_filtered_SNP.vcf.gz	68.234758 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr12_EUR_only_filtered_SNP.vcf.gz	67.236061 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr13_EUR_only_filtered_SNP.vcf.gz	52.542831 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr14_EUR_only_filtered_SNP.vcf.gz	46.602044 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr15_EUR_only_filtered_SNP.vcf.gz	41.361693 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr16_EUR_only_filtered_SNP.vcf.gz	40.253974 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr17_EUR_only_filtered_SNP.vcf.gz	37.830008 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr18_EUR_only_filtered_SNP.vcf.gz	40.526297 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr19_EUR_only_filtered_SNP.vcf.gz	30.856270 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr20_EUR_only_filtered_SNP.vcf.gz	27.437639 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr21_EUR_only_filtered_SNP.vcf.gz	16.148565 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr22_EUR_only_filtered_SNP.vcf.gz	16.338168 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chrX_EUR_only_filtered_SNP.vcf.gz	31.997931 seconds
+🔄 Merging SAS...
+✅ Done: /user/home/xd14188/repo/1kg_hg38/mergedPopVcf/SAS_merged.vcf.gz
+Checking the headers and starting positions of 23 files
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr1_SAS_only_filtered_SNP.vcf.gz	114.461690 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr2_SAS_only_filtered_SNP.vcf.gz	120.099323 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr3_SAS_only_filtered_SNP.vcf.gz	103.997128 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr4_SAS_only_filtered_SNP.vcf.gz	104.287592 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr5_SAS_only_filtered_SNP.vcf.gz	93.779754 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr6_SAS_only_filtered_SNP.vcf.gz	98.543831 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr7_SAS_only_filtered_SNP.vcf.gz	86.154540 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr8_SAS_only_filtered_SNP.vcf.gz	76.524620 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr9_SAS_only_filtered_SNP.vcf.gz	66.535653 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr10_SAS_only_filtered_SNP.vcf.gz	76.980541 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr11_SAS_only_filtered_SNP.vcf.gz	70.773085 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr12_SAS_only_filtered_SNP.vcf.gz	71.131400 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr13_SAS_only_filtered_SNP.vcf.gz	54.621547 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr14_SAS_only_filtered_SNP.vcf.gz	48.855689 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr15_SAS_only_filtered_SNP.vcf.gz	44.079415 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr16_SAS_only_filtered_SNP.vcf.gz	42.429982 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr17_SAS_only_filtered_SNP.vcf.gz	39.633115 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr18_SAS_only_filtered_SNP.vcf.gz	37.235058 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr19_SAS_only_filtered_SNP.vcf.gz	26.135167 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr20_SAS_only_filtered_SNP.vcf.gz	21.067098 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr21_SAS_only_filtered_SNP.vcf.gz	12.795393 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr22_SAS_only_filtered_SNP.vcf.gz	13.038235 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chrX_SAS_only_filtered_SNP.vcf.gz	33.302193 seconds
+🔄 Merging AFR...
+✅ Done: /user/home/xd14188/repo/1kg_hg38/mergedPopVcf/AFR_merged.vcf.gz
+Checking the headers and starting positions of 23 files
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr1_AFR_only_filtered_SNP.vcf.gz	241.205015 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr2_AFR_only_filtered_SNP.vcf.gz	257.994615 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr3_AFR_only_filtered_SNP.vcf.gz	221.902577 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr4_AFR_only_filtered_SNP.vcf.gz	221.028168 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr5_AFR_only_filtered_SNP.vcf.gz	203.329229 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr6_AFR_only_filtered_SNP.vcf.gz	196.073621 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr7_AFR_only_filtered_SNP.vcf.gz	119.491437 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr8_AFR_only_filtered_SNP.vcf.gz	69.958055 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr9_AFR_only_filtered_SNP.vcf.gz	26.954787 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr10_AFR_only_filtered_SNP.vcf.gz	30.910155 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr11_AFR_only_filtered_SNP.vcf.gz	29.631738 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr12_AFR_only_filtered_SNP.vcf.gz	28.950735 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr13_AFR_only_filtered_SNP.vcf.gz	22.020533 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr14_AFR_only_filtered_SNP.vcf.gz	20.116093 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr15_AFR_only_filtered_SNP.vcf.gz	18.690485 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr16_AFR_only_filtered_SNP.vcf.gz	18.217291 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr17_AFR_only_filtered_SNP.vcf.gz	17.269365 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr18_AFR_only_filtered_SNP.vcf.gz	17.656766 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr19_AFR_only_filtered_SNP.vcf.gz	13.880167 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr20_AFR_only_filtered_SNP.vcf.gz	14.636983 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr21_AFR_only_filtered_SNP.vcf.gz	9.236664 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chr22_AFR_only_filtered_SNP.vcf.gz	9.001150 seconds
+Concatenating /user/home/xd14188/repo/1kg_hg38/vcfPops/chrX_AFR_only_filtered_SNP.vcf.gz	33.503736 seconds
