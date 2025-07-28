@@ -6,7 +6,7 @@ notInVcfSample/
 tmp_vcf_sampleName/
 vcfFiles/
 vcfPops/
-./run_plink_para.sh
-./plink_parallel.sh
-./plink_para_2_bcftools-R.sh
-./download.sh
+run_plink_para.sh
+plink_parallel.sh
+plink_para_2_bcftools-R.sh
+download.sh
