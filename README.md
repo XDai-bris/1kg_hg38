@@ -35,8 +35,7 @@ Ensure the following tools are available in your environment:
 ## 🗂 Inputs
 
 - **Chromosome VCFs:**  
-  Download from the 1000 Genomes high-coverage data (hg38), one file per chr1–22 and X, stored in `vcfFiles/`. 
-  ➤ *Used /script/download.sh 
+  Used /script/download.sh to download from the 1000 Genomes high-coverage data (hg38), one file per chr1–22 and X, stored in `vcfFiles/`. 
 - **Sample Lists:**  
   One per population (e.g., `sampleName_EUR.txt`, `sampleName_AFR.txt`), stored in `sampleName/`.  
   ➤ *Each list contains sample IDs corresponding to individuals from that population.*

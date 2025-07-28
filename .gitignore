@@ -1,5 +1,5 @@
 vcfFiles/
-./slurm*
+slurm*
 mergedPopBed/
 mergedPopVcf/
 notInVcfSample/
