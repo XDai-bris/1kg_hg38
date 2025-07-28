@@ -1,10 +1,10 @@
 #!/bin/bash
 
 #SBATCH --job-name=download_job
-#SBATCH --partition=test
-#SBATCH --nodes=1
+#SBATCH --partition=mrcieu,cpu,test
+#SBATCH --nodes=2
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=2:0:0
+#SBATCH --time=3:0:0
 #SBATCH --mem=4G
 #SBATCH --account=smed001801
 
@@ -14,14 +14,17 @@ gz_file_end=".filtered.SNV_INDEL_SV_phased_panel.vcf.gz"
 tbi_file_end=".filtered.SNV_INDEL_SV_phased_panel.vcf.gz.tbi"
 vcf_file_dir="/user/work/xd14188/repo/1kg_hg38/vcfFiles"
 
-wget https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000G_2504_high_coverage/working/20220422_3202_phased_SNV_INDEL_SV/20220804_manifest.txt
-
 mkdir -p "${vcf_file_dir}"
 
-for chr in 3 4 X; do
+wget https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000G_2504_high_coverage/working/20220422_3202_phased_SNV_INDEL_SV/20220804_manifest.txt  -P "${vcf_file_dir}"
+
+for chr in {1..22}; do
     wget "${download_http}${chr}${gz_file_end}" -P "${vcf_file_dir}"
     wget "${download_http}${chr}${tbi_file_end}" -P "${vcf_file_dir}"
 done
+
+wget "${download_http}X.filtered.SNV_INDEL_SV_phased_panel.v2.vcf.gz" -P "${vcf_file_dir}"
+wget "${download_http}X.filtered.SNV_INDEL_SV_phased_panel.v2.vcf.gz" -P "${vcf_file_dir}"
 
 # # Verify checksums
 # grep -E "chr(3|4|X).*vcf.gz" 20220804_manifest.txt > manifest_subset.txt
