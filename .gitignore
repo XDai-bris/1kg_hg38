@@ -17,3 +17,7 @@ merged_genome
 logs
 tmp
 fltUnMatchedRsID
+/*.sh
+/*.R
+!scripts/*.sh
+!scripts/*.R
