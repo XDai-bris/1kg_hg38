@@ -9,3 +9,7 @@ vcfFiles/*
 .DS_Store
 vcfPops/*
 test.sh
+tmp
+filterVar
+output
+
