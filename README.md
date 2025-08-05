@@ -1,6 +1,7 @@
-# 1KGP High-Coverage VCF Processing Pipeline (hg38, HPC Version)
+# 1KGP High-Coverage VCF Processing Pipeline (hg38, HPC-Optimized)
 
-This HPC-optimized pipeline automates the extraction, filtering, and transformation of 1000 Genomes Project high-coverage (hg38) VCFs into population-specific, dbSNP-verified, and PLINK-compatible files. It leverages `bcftools`, `plink`, and GNU `parallel` for efficient chromosome- and population-level processing on high-performance clusters.
+This HPC-ready pipeline automates extraction, filtering, and transformation of high-coverage 1000 Genomes Project (hg38) VCFs into **population-specific**, **rsID-verified**, and **PLINK-compatible** files.\
+Built for high-performance computing environments using `plink2`, `bcftools`, R, and `GNU parallel`.
 
 ---
 
@@ -8,120 +9,170 @@ This HPC-optimized pipeline automates the extraction, filtering, and transformat
 
 ```
 1kg_hg38/
-├── vcfFiles/              # Input: Downloaded Chromosome VCFs (chr1..22, X)
-├── sampleName/            # Input: Sample list per population (e.g., sampleName_EUR.txt)
-├── tmp_vcf_sampleName/    # Temp: Extracted sample names from input VCFs
-├── notInVcfSample/        # Output: Samples listed but not found in VCFs
-├── vcfPops/               # Output: Population-filtered, dbSNP-verified VCFs
-│   └── logs/              # Logs for each chr/pop processing step
-├── mergedPopVcf/          # Output: Merged population-level VCFs
-└── mergedPopBed/          # Output: Final PLINK .bed/.bim/.fam files per population
+├── vcfFiles/                  # Input: VCF files per chromosome (chr1–22, X)
+├── sampleName/               # Input: Sample list per population (e.g., AFR.fam)
+├── bedFiles_maf001/          # Output: Final cleaned PLINK files (per chr × pop)
+│   └── chr<chr>_<pop>/       # → final_output.{bed,bim,fam}
+├── tmp/                      # Intermediate files per job
+├── logs/                     # Per-task logs from chr/pop processing
+├── filterVar/                # Variants that couldn't be renamed to rsIDs
+├── fltMultiallelics/         # Multiallelic variants filtered out
+├── fltUnMatchedRsID/         # Clean variants with no rsID match
+├── scripts/                  # Optional: scripts used in the process
+├── mergeChrBed.sh            # Script to merge across chromosomes per pop
+├── filter_multiallelic_by_freq.R  # R script to filter Multiallelics by ALT_FREQ
+├── run_chr_pop_pipeline.sh   # Main pipeline driver for Chr1-22 in HPC
+└── run_chrX_pipeline.sh      # Main pipeline driver for ChrX in HPC
 ```
 
 ---
 
 ## 🧰 Dependencies
 
-Ensure the following tools are available in your environment:
+Make sure the following tools are installed and available:
 
-- [`bcftools`](bcftools/1.19-openblas-2333)
-- [`plink2`](plink2/2.00a4.3-netlib-lapack-qbk6) 
-- [`GNU parallel`](http://www.gnu.org/software/parallel)
-- High-coverage 1000 Genomes data:  
-  [`20220422_3202_phased_SNV_INDEL_SV`](https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000G_2504_high_coverage/working/20220422_3202_phased_SNV_INDEL_SV/)
-
----
-
-## 🗂 Inputs
-
-- **Chromosome VCFs:**  
-  Used /script/download.sh to download from the 1000 Genomes high-coverage data (hg38), one file per chr1–22 and X, stored in `vcfFiles/`. 
-- **Sample Lists:**  
-  One per population (e.g., `sampleName_EUR.txt`, `sampleName_AFR.txt`), stored in `sampleName/`.  
-  ➤ *Each list contains sample IDs corresponding to individuals from that population.*
-
-- **dbSNP v157 hg38 (biallelic rsIDs only):**  
-  TAB-delimited file: `dbsnp157_biallelic_rs_hg38_UCSC.tab`  
-  Path: `repo/data/genomeRef/dbsnp157_biallelic_rs_hg38_UCSC.tab/`  
-  ➤ *Used to retain known and reliable SNPs.*
+- [`plink2`](https://www.cog-genomics.org/plink/2.0/)
+- [`bcftools`](https://samtools.github.io/bcftools/)
+- [`GNU parallel`](https://www.gnu.org/software/parallel/)
+- `R` with packages: `dplyr`, `readr`
 
 ---
 
-## ⚙️ Pipeline Overview
+## 🦬 Inputs
 
-### Step 1: **Chromosome + Population Filtering**
-- Extracts VCF sample names
-- Filters to keep only samples for the selected population
-- Filters for SNPs only, and retains those with **MAF > 0.01**
-- Outputs filtered `.vcf.gz` and associated variant list
+- **Chromosome VCFs**\
+  One per chromosome (e.g., `chr10.vcf.gz`), downloaded from:
 
-### Step 2: **dbSNP Verification**
-- Intersects filtered variants with `dbsnp157_biallelic_rs_hg38` to ensure known SNPs
-- Generates:
-  - Filtered `.vcf.gz`
-  - `.tab` files listing positions before and after dbSNP filtering
+  ```
+  https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000G_2504_high_coverage/working/20220422_3202_phased_SNV_INDEL_SV/
+  ```
 
-### Step 3: **Parallel Execution**
-- Steps 1–2 are run in parallel across all chromosomes and populations using `GNU parallel`
+- **Sample Lists**\
+  One `.fam` file per population, e.g.:
 
-### Step 4: **VCF Merging**
-- Merges filtered per-chromosome VCFs into population-wide VCFs
-- Output: `mergedPopVcf/<pop>_merged.vcf.gz`
+  ```
+  sampleName/AFR.fam
+  sampleName/EUR.fam
+  ...
+  ```
 
-### Step 5: **Convert to PLINK Format**
-- Uses `plink` to convert merged VCFs to `.bed/.bim/.fam` for downstream GWAS or analysis
+- **dbSNP rsID Map (per chromosome)**\
+  Files like `chr21_dbsnp.tsv`, in format:
+
+  ```
+  CHR:POS:REF:ALT    rsID
+  ```
+
+  Located in:
+
+  ```
+  /user/home/xd14188/repo/data/genomeRef/cpra_rsID/
+  ```
 
 ---
 
-## 🚀 Usage
+## ⚙️ Pipeline Workflow
 
-1. **Make script executable:**
-   ```bash
-   chmod +x process_1kg_pipeline.sh
-   ```
+### 1. **Per-Chromosome, Per-Population Filtering**
 
-2. **Run the pipeline:**
-   ```bash
-   ./process_1kg_pipeline.sh
-   ```
+For each chromosome × population:
 
-3. **Control parallelism:**  
-   The number of concurrent jobs (`-j`) can be tuned at the bottom of the script to match your HPC cluster limits.
+- Filters to population-specific individuals
+- Filters variants to keep variants with **MAF ≥ 0.01**
+- Computes allele frequency
+- Filters out multiallelic sites using Max ALT frequency selection in R `filter_multiallelic_by_freq.R`
+- Renames variants to `rsIDs` using exact CHR\:POS\:REF\:ALT match per CHR 
+- Saves unmatched variants and removed multiallelics separately
+- Final output: `final_output.{bed,bim,fam}` with rsIDs
+- Verified `final_output.{bed,bim,fam}` via allele frequency (`--freq`) calculation per merged output
+
+🌟 Output directory:\
+`bedFiles_maf001/chr<chr>_<pop>/final_output.*`
+
+---
+
+### 2. **Parallelized Execution**
+
+Run across multiple chromosome × population pairs via:
+
+> Uses GNU `parallel` to dispatch jobs concurrently. Modify `-j 12` in the script to suit your HPC's limits.
+
+---
+
+### 3. **Merging Across Chromosomes (Optional)**
+
+Merge PLINK files across all chromosomes per population using:
+
+```bash
+./mergeChrBed.sh
+```
+
+Output saved to `merged_genome/<POP>_merged.*`
+
+Also verifies merge via allele frequency (`--freq`) per merged output.
+
+---
+
+## 🧪 Validation
+
+After processing, each final PLINK file is validated using `plink2 --freq` to ensure integrity.
+
+Each folder contains:
+
+- `final_output.bed/bim/fam`
+- `final_output_freq.afreq` (for quality check)
+- Log: `final_output.log`
 
 ---
 
 ## 🌍 Supported Populations
 
-- `EUR` – European  
-- `AFR` – African  
-- `EAS` – East Asian  
-- `SAS` – South Asian  
-- `AMR` – Admixed American  
+- `EUR` – European
+- `AFR` – African
+- `EAS` – East Asian
+- `SAS` – South Asian
+- `AMR` – Admixed American
 
 ---
 
-## 📤 Output Files
+## 📄 Key Outputs
 
-- `vcfPops/chr<chr>_<pop>_only.vcf.gz` – SNPs filtered by population
-- `vcfPops/chr<chr>_<pop>_only_varList.tab` – Variant positions (pre-dbsnp filtering)
-- `vcfPops/chr<chr>_<pop>_only_varList_filtered.tab` – Variants retained after dbSNP filter
-- `vcfPops/chr<chr>_<pop>_only_filtered_SNP.vcf.gz` – Final filtered VCF
-- `mergedPopVcf/<pop>_merged.vcf.gz` – Merged across chromosomes
-- `mergedPopBed/<pop>_plink.bed/.bim/.fam` – Final PLINK binary format
-- `notInVcfSample/chr<chr>_notInVcfSample_<pop>.txt` – Missing samples
-
----
-
-## ⚠️ Notes
-
-- **Sample ID Matching:** Make sure your `sampleName_*.txt` contains correct sample IDs matching those in the 1KGP VCFs.
-- **Missing Samples:** Some population lists may include samples not present in VCFs; those are logged in `notInVcfSample/`.
-- **Logging:** Full per-task logs can be found in `vcfPops/logs/`.
+| Folder              | Contents                                         |
+| ------------------- | ------------------------------------------------ |
+| `bedFiles_maf001/`  | Final PLINK files per chr/pop (`final_output.*`) |
+| `fltMultiallelics/` | BIM files with removed multiallelic variants     |
+| `fltUnMatchedRsID/` | BIM entries that could not be matched to rsID    |
+| `filterVar/`        | All unmatched entries not kept in final output   |
+| `merged_genome/`    | Per-population merged genome-wide PLINK files    |
 
 ---
 
-## 📄 License & Citation
 
-If using this pipeline for publication, cite the 1000 Genomes Project and tools (bcftools, plink and GUN parellel) as appropriate.
+## 👎 Notes
+
+- 1000G vcfs differs from the common multiallelic representation (e.g., using commas ',' to separate ALT alleles), which can be easily overlooked during processing:
+  - SNVs and INDELs were phased in SHAPEIT2-duohmm, which does not handle multiallelic variant
+  - we first split `multiallelic variants into separate rows` while left-aligning and normalizing INDELs using bcftools norm (Li, 2011). To phase both biallelic and multiallelic variants, we `shifted the positions of additional ALT alleles (2nd, 3rd, etc.) by 1 or more base pairs` to ensure unique start positions required by SHAPEIT2. After phasing, `positions were shifted back to their original coordinates`.
+- Using `awk` to reading chr_bim and check with c:p:r:a format is per chr is much faster
+- ChrX without variant ID in the VCF, which needs make c:p:r:a ID at first BIM file
+- Logs are stored in `logs/` with full stdout/stderr per job
+- You can re-run individual jobs easily by modifying `run_chr_pop_pipeline.sh`
 
 ---
+
+## 📄 Citation
+
+If this pipeline helps your work, please cite:
+
+- The [1000 Genomes Project](https://www.internationalgenome.org/)
+- [PLINK2](https://www.cog-genomics.org/plink/2.0/)
+- [bcftools](http://samtools.github.io/bcftools/)
+- [GNU Parallel](https://www.gnu.org/software/parallel/)
+
+---
+
+## 👨‍💻 Maintainer
+
+**Xiaoyang Dai**\
+📧 [xd14188@bristol.ac.uk](mailto\:xd14188@bristol.ac.uk)
+

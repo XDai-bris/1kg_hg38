@@ -10,3 +10,10 @@ run_plink_para.sh
 plink_parallel.sh
 plink_para_2_bcftools-R.sh
 download.sh
+bedFiles_maf001
+tmp_check_varNum
+fltMultiallelics
+merged_genome
+logs
+tmp
+fltUnMatchedRsID
