@@ -1,11 +1,11 @@
 #!/bin/bash
 
-#SBATCH --job-name=download_job
-#SBATCH --partition=mrcieu,cpu,test
-#SBATCH --nodes=6
-#SBATCH --ntasks-per-node=6
-#SBATCH --time=1:0:0
-#SBATCH --mem=24G
+#SBATCH --job-name=run_pipeline
+#SBATCH --partition=mrcieu,cpu
+#SBATCH --nodes=12
+#SBATCH --ntasks-per-node=1
+#SBATCH --time=26:0:0
+#SBATCH --mem=60G
 #SBATCH --account=smed001801
 
 # Load required modules
@@ -25,7 +25,5 @@ R --version
 
 
 
-# bash run_plink_para.sh
-# bash mergeChrBed.sh
-# bash mergeSolv.sh
- bash run_chrX_pipeline.sh
+bash run_chr_pop_pipeline_imputedVarID.sh
+bash mergeChrBed.sh

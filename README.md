@@ -21,8 +21,7 @@ Built for high-performance computing environments using `plink2`, `bcftools`, R,
 ├── scripts/                  # Optional: scripts used in the process
 ├── mergeChrBed.sh            # Script to merge across chromosomes per pop
 ├── filter_multiallelic_by_freq.R  # R script to filter Multiallelics by ALT_FREQ
-├── run_chr_pop_pipeline.sh   # Main pipeline driver for Chr1-22 in HPC
-└── run_chrX_pipeline.sh      # Main pipeline driver for ChrX in HPC
+└── run_chr_pop_pipeline_imputedVarID..sh   # Main pipeline driver for Chr1-22 ChrX in HPC
 ```
 
 ---
@@ -78,8 +77,9 @@ Make sure the following tools are installed and available:
 For each chromosome × population:
 
 - Filters to population-specific individuals
+- Impute mismatched/missing variant IDs in BIM file as CHR:POS:REF:ALT
 - Filters variants to keep variants with **MAF ≥ 0.01**
-- Computes allele frequency
+- Computes alt allele frequency
 - Filters out multiallelic sites using Max ALT frequency selection in R `filter_multiallelic_by_freq.R`
 - Renames variants to `rsIDs` using exact CHR\:POS\:REF\:ALT match per CHR 
 - Saves unmatched variants and removed multiallelics separately

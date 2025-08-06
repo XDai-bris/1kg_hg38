@@ -8,7 +8,7 @@ OUT_DIR="/user/home/xd14188/repo/1kg_hg38/merged_genome"
 MERGE_SUMMARY="$OUT_DIR/variants_pop.txt"
 
 populations=("AFR" "AMR" "EAS" "EUR" "SAS")
-chroms=$(seq 1 22)
+chroms=({1..22} X)
 
 mkdir -p "$OUT_DIR"
 > "$MERGE_SUMMARY"  # Clear old summary

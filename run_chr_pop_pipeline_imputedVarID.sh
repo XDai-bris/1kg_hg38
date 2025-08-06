@@ -2,25 +2,34 @@
 set -euo pipefail
 
 # === CONFIGURATION ===
+# Set working directory and paths
 cwd="/user/home/xd14188/repo/1kg_hg38"
 vcf_dir="${cwd}/vcfFiles"
 sample_dir="${cwd}/sampleName"
-dbsnp_file="/user/home/xd14188/repo/data/genomeRef/cpra_rsID/chrX_dbsnp.tsv"
+dbsnp_dir="/user/home/xd14188/repo/data/genomeRef/cpra_rsID" 
 r_script="${cwd}/filter_multiallelic_by_freq.R"
 
 populations=("EUR" "AFR" "EAS" "SAS" "AMR")
-chr="X"
 
-# === MAIN ===
-for pop in "${populations[@]}"; do
-    echo "🔄 chrX | ${pop}"
+chroms=({1..22} X)
 
-    log_file="${cwd}/logs/chrX_${pop}.log"
-    vcf_file="${vcf_dir}/1kGP_high_coverage_Illumina.chrX.filtered.SNV_INDEL_SV_phased_panel.vcf.gz"
+# Output base directories
+mkdir -p "${cwd}/logs" "${cwd}/bedFiles_maf001"
+
+# === FUNCTION ===
+process_chr_pop() {
+    chr="$1"
+    pop="$2"
+
+    echo "🔄 chr${chr} | ${pop}"
+
+    log_file="${cwd}/logs/chr${chr}_${pop}.log"
+    vcf_file="${vcf_dir}/1kGP_high_coverage_Illumina.chr${chr}.filtered.SNV_INDEL_SV_phased_panel.vcf.gz"
     keep_file="${sample_dir}/${pop}.fam"
+    dbsnp_file="${dbsnp_dir}/chr${chr}_dbsnp.tsv"
 
-    tmpdir="${cwd}/tmp/chrX_${pop}"
-    outdir="${cwd}/bedFiles_maf001/chrX_${pop}"
+    tmpdir="${cwd}/tmp/chr${chr}_${pop}"
+    outdir="${cwd}/bedFiles_maf001/chr${chr}_${pop}"
     unmatched_dir="${cwd}/filterVar"
     multiallelic_dir="${cwd}/fltMultiallelics"
     unmapped_rsID_dir="${cwd}/fltUnMatchedRsID"
@@ -30,13 +39,14 @@ for pop in "${populations[@]}"; do
     out_prefix="$tmpdir/out"
     cleaned_prefix="$tmpdir/out_cleaned"
     renamed_bim="$tmpdir/renamed.bim"
-    unmatched_rsID_bim="$unmapped_rsID_dir/chrX_${pop}_unmatched_rsID.bim"
-    multiallelic_bim="$multiallelic_dir/chrX_${pop}_multiallelic.bim"
+    unmatched_rsID_bim="$unmapped_rsID_dir/chr${chr}_${pop}_unmatched_rsID.bim"
+    multiallelic_bim="$multiallelic_dir/chr${chr}_${pop}_multiallelic.bim"
     final_prefix="${outdir}/final_output"
 
     {
-        echo "=== Processing chrX | ${pop} ==="
+        echo "=== Processing chr${chr} | ${pop} ==="
 
+        # --- Step 0: Input Validation ---
         [[ ! -f "$vcf_file" ]] && echo "❌ Missing VCF: $vcf_file" && exit 1
         [[ ! -f "$keep_file" ]] && echo "❌ Missing sample list: $keep_file" && exit 1
         [[ ! -f "$dbsnp_file" ]] && echo "❌ dbSNP file: $dbsnp_file" && exit 1
@@ -45,31 +55,36 @@ for pop in "${populations[@]}"; do
         echo "[STEP 1] Convert VCF to PLINK with MAF ≥ 0.01..."
         plink2 --vcf "$vcf_file" --keep "$keep_file" --maf 0.01 \
             --make-bed --out "$out_prefix" --silent
-
-        # --- Step 1.5: Impute missing variant IDs as CHR:POS:REF:ALT ---
+        
+        # --- Step 1.5: Impute mismatched/missing variant IDs as CHR:POS:REF:ALT ---
         echo "[STEP 1.5] Imputing missing variant IDs as CHR:POS:REF:ALT..."
         awk 'BEGIN{OFS="\t"} { $2 = $1 ":" $4 ":" $6 ":" $5; print }' "${out_prefix}.bim" > "${out_prefix}.bim.tmp"
         mv "${out_prefix}.bim.tmp" "${out_prefix}.bim"
-
+        
+        # --- Step 2: Compute Allele Frequencies ---
         echo "[STEP 2] Compute allele frequencies..."
-        afreq_file="$tmpdir/afreq_chrX_${pop}.afreq"
+        afreq_file="$tmpdir/afreq_chr${chr}_${pop}.afreq"
         plink2 --bfile "$out_prefix" --freq --out "${afreq_file%.afreq}" --silent
 
-        echo "[STEP 3] Filter multiallelic variants via R..."
-        filtered_prefix="$tmpdir/filtered_output_chrX_${pop}"
+        # --- Step 3: Filter multiallelic variants via R ---
+        echo "[STEP 3] Run R script to filter multiallelic variants..."
+        filtered_prefix="$tmpdir/filtered_output_chr${chr}_${pop}"
         Rscript "$r_script" "${out_prefix}.bim" "$afreq_file" "$filtered_prefix"
 
+        # --- Step 4: Keep only highest-frequency variants ---
         echo "[STEP 4] Filter .bed/.bim/.fam using keep list..."
         plink2 --bfile "$out_prefix" \
             --extract "${filtered_prefix}_keep.txt" \
             --make-bed --out "$cleaned_prefix" --silent
 
+        # --- Step 5: Save removed multiallelics (BIM only) ---
         echo "[STEP 5] Save removed multiallelic variants (BIM only)..."
         awk 'NR==FNR{a[$1]; next} ($2 in a)' \
             "${filtered_prefix}_remove.txt" "${out_prefix}.bim" \
             > "$multiallelic_bim"
 
-        echo "[STEP 6] Rename variants in BIM (chrX-aware)..."
+        # --- Step 6: Rename variants in BIM using dbSNP mapping ---
+        echo "[STEP 6] Rename variants in BIM..."
         awk '
             BEGIN { OFS="\t" }
             FNR == NR { map[$1] = $2; next }
@@ -84,7 +99,8 @@ for pop in "${populations[@]}"; do
             }
         ' "$dbsnp_file" "${cleaned_prefix}.bim"
 
-        echo "[STEP 7] Generate final PLINK file with rsID..."
+        # --- Step 7: Generate Final Output ---
+        echo "[STEP 7] Generating final PLINK file with rsID..."
         comm -23 <(cut -f2 "${cleaned_prefix}.bim" | sort) \
                  <(cut -f2 "$unmatched_rsID_bim" | sort) > "$tmpdir/keep_final.txt"
 
@@ -93,18 +109,30 @@ for pop in "${populations[@]}"; do
 
         cp "$renamed_bim" "${final_prefix}.bim"
 
-        echo "[STEP 8] Verify final PLINK with --freq"
+        # --- Step 8: Verify Final Output with --freq ---
+        echo "[STEP 8] Verifying final PLINK file with --freq..."
         plink2 --bfile "$final_prefix" --freq \
             --out "${final_prefix}_freq" --silent
 
+        # --- Final Summary ---
         unmapped_count=$(wc -l < "$unmatched_rsID_bim")
         multiallelic_count=$(wc -l < "$multiallelic_bim")
 
         echo ""
-        echo "✅ Done: chrX ${pop}"
-        echo "→ Final: $final_prefix.*"
-        echo "→ Unmatched rsIDs: $unmatched_rsID_bim (n = $unmapped_count)"
-        echo "→ Multiallelic removed: $multiallelic_bim (n = $multiallelic_count)"
-        echo "→ Intermediate: $tmpdir/"
+        echo "✅ Done: chr${chr} ${pop}"
+        echo "→ Final BED/BIM/FAM with rsIDs: $final_prefix.*"
+        echo "→ Removed multiallelics (BIM only): $multiallelic_bim (n = $multiallelic_count)"
+        echo "→ Unmatched variants (no rsID match): $unmatched_rsID_bim (n = $unmapped_count)"
+        echo "→ Intermediate files in: $tmpdir/"
     } &> "$log_file"
-done
+}
+
+export -f process_chr_pop
+export cwd vcf_dir sample_dir dbsnp_dir plink2 r_script
+
+# === RUN PARALLEL ===
+echo "🚀 Launching parallel jobs..."
+parallel -j 12 process_chr_pop ::: "${chroms[@]}" ::: "${populations[@]}"
+echo "✅ All jobs submitted."
+
+
