@@ -16,16 +16,25 @@ suppressMessages(library(readr))
 
 # === Step 1: Read AFREQ ===
 message("[1/5] Reading allele frequency file: ", afreq_file)
-afreq <- read_tsv(afreq_file, col_names = FALSE, comment = "#", col_types = cols(
-  X1 = col_character(),   # CHR
-  X2 = col_character(),   # ID
-  X3 = col_character(),   # REF
-  X4 = col_character(),   # ALT
-  X5 = col_character(),   # PROVISIONAL_REF
-  X6 = col_double(),      # ALT_FREQ
-  X7 = col_integer()      # OBS_CT
-))
-colnames(afreq) <- c("CHR", "ID", "REF", "ALT", "PROVISIONAL_REF", "ALT_FREQ", "OBS_CT")
+# Read with the file's own headers; keep '#CHROM' then normalize
+afreq <- readr::read_tsv(afreq_file, show_col_types = FALSE)
+
+# Normalize headers from PLINK2:
+if ("#CHROM" %in% names(afreq)) names(afreq)[names(afreq) == "#CHROM"] <- "CHR"
+if ("ALT_FREQS" %in% names(afreq)) names(afreq)[names(afreq) == "ALT_FREQS"] <- "ALT_FREQ"
+if (!"PROVISIONAL_REF" %in% names(afreq)) afreq$PROVISIONAL_REF <- NA_character_
+
+# Enforce types
+afreq <- dplyr::mutate(
+  afreq,
+  CHR = as.character(CHR),
+  ID = as.character(ID),
+  REF = as.character(REF),
+  ALT = as.character(ALT),
+  PROVISIONAL_REF = as.character(PROVISIONAL_REF),
+  ALT_FREQ = as.numeric(ALT_FREQ),
+  OBS_CT = as.integer(OBS_CT)
+)
 
 # === Step 2: Read BIM ===
 message("[2/5] Reading BIM file: ", bim_file)
@@ -43,12 +52,18 @@ bim <- read_table(bim_file,
 
 # === Step 3: Merge by ID ===
 message("[3/5] Merging BIM with AFREQ by variant ID...")
-merged <- inner_join(bim, afreq, by = "ID") %>%
+afreq_dedup <- afreq %>%
+  group_by(ID) %>%
+  slice_max(order_by = ALT_FREQ, n = 1, with_ties = FALSE) %>%
+  ungroup()
+
+merged <- inner_join(bim, afreq_dedup, by = "ID") %>%
   rename(
     CHR = CHR.x,
     ALT = ALT.x,
     REF = REF.x
   )
+
 
 # === Step 4: Keep highest ALT_FREQ per CHR:POS ===
 message("[4/5] Selecting max ALT_FREQ per CHR:POS...")

@@ -20,6 +20,7 @@ Built for high-performance computing environments using `plink2`, `bcftools`, R,
 ├── fltUnMatchedRsID/         # Clean variants with no rsID match
 ├── scripts/                  # Optional: scripts used in the process
 ├── mergeChrBed.sh            # Script to merge across chromosomes per pop
+├── merged_genome             # Final merged pop.{bed,bim,fam,pgen,psam,pvar,afreq}
 ├── filter_multiallelic_by_freq.R  # R script to filter Multiallelics by ALT_FREQ
 └── run_chr_pop_pipeline_imputedVarID..sh   # Main pipeline driver for Chr1-22 ChrX in HPC
 ```
@@ -107,7 +108,7 @@ Merge PLINK files across all chromosomes per population using:
 ./mergeChrBed.sh
 ```
 
-Output saved to `merged_genome/<POP>_merged.*`
+Output saved to `merged_genome/<POP>_genome.*`
 
 Also verifies merge via allele frequency (`--freq`) per merged output.
 
@@ -156,7 +157,6 @@ Each folder contains:
 - Using `awk` to reading chr_bim and check with c:p:r:a format is per chr is much faster
 - ChrX without variant ID in the VCF, which needs make c:p:r:a ID at first BIM file
 - Logs are stored in `logs/` with full stdout/stderr per job
-- You can re-run individual jobs easily by modifying `run_chr_pop_pipeline.sh`
 
 ---
 
