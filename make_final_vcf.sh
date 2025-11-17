@@ -304,10 +304,29 @@ PYCODE
 echo "✅ Done. Files:"
 ls -l "${VCF_OUT}" "${LOG_OUT}" || true
 
+
+# ---- Compress and index final VCF to BCF ----
+echo "📦 Compressing and indexing VCF to BCF..."
 module load bcftools/1.19-openblas-2333
 module load  htslib/1.19.1-v2zi
-bgzip -c with_popAF.vcf > with_popAF.vcf.gz
-tabix -p vcf with_popAF.vcf.gz
-bcftools view -Ob -o with_popAF.bcf with_popAF.vcf.gz
+# Write header (all lines starting with #)
+grep '^#' with_popAF.vcf > with_popAF.sorted.vcf
+
+# Append sorted body (non-header)
+grep -v '^#' with_popAF.vcf \
+  | LC_ALL=C sort -T /tmp -k1,1V -k2,2n \
+  >> with_popAF.sorted.vcf
+head with_popAF.sorted.vcf
+tail with_popAF.sorted.vcf
+wc -l with_popAF.vcf with_popAF.sorted.vcf
+bgzip with_popAF.sorted.vcf
+file with_popAF.sorted.vcf.gz
+zcat with_popAF.sorted.vcf.gz | head
+tabix -p vcf with_popAF.sorted.vcf.gz
+
+bcftools view -Ob -o with_popAF.bcf with_popAF.sorted.vcf.gz
 bcftools index -f with_popAF.bcf
-echo "✅ Compressed and indexed BCF: with_popAF.bcf"    
+
+ls -lh with_popAF.bcf
+bcftools view -h with_popAF.bcf | head
+bcftools view with_popAF.bcf | head
