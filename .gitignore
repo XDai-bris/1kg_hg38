@@ -16,3 +16,5 @@ merged_genome
 logs
 tmp
 fltUnMatchedRsID
+merged_genome_ALL
+final_vcf_outputWithAfreq

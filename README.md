@@ -7,22 +7,32 @@ Built for high-performance computing environments using `plink2`, `bcftools`, R,
 
 ## 📁 Project Structure
 
-```
+```bash
 1kg_hg38/
-├── vcfFiles/                  # Input: VCF files per chromosome (chr1–22, X)
-├── sampleName/               # Input: Sample list per population (e.g., AFR.fam)
-├── bedFiles_maf001/          # Output: Final cleaned PLINK files (per chr × pop)
-│   └── chr<chr>_<pop>/       # → final_output.{bed,bim,fam}
-├── tmp/                      # Intermediate files per job
-├── logs/                     # Per-task logs from chr/pop processing
-├── filterVar/                # Variants that couldn't be renamed to rsIDs
-├── fltMultiallelics/         # Multiallelic variants filtered out
-├── fltUnMatchedRsID/         # Clean variants with no rsID match
-├── scripts/                  # Optional: scripts used in the process
-├── mergeChrBed.sh            # Script to merge across chromosomes per pop
-├── merged_genome             # Final merged pop.{bed,bim,fam,pgen,psam,pvar,afreq}
-├── filter_multiallelic_by_freq.R  # R script to filter Multiallelics by ALT_FREQ
-└── run_chr_pop_pipeline_imputedVarID..sh   # Main pipeline driver for Chr1-22 ChrX in HPC
+├── vcfFiles/                      # Input: VCF files per chromosome (chr1–22, X)
+├── sampleName/                    # Input: Sample list per population (e.g., AFR.fam)
+├── bedFiles_maf001/               # Output: Final cleaned PLINK files (per chr × pop)
+│   └── chr<chr>_<pop>/            # → final_output.{bed,bim,fam}
+├── tmp/                           # Intermediate files per job
+├── logs/                          # Per-task logs from chr/pop processing
+├── filterVar/                     # Variants that couldn't be renamed to rsIDs
+├── fltMultiallelics/              # Multiallelic variants filtered out
+├── fltUnMatchedRsID/              # Clean variants with no rsID match
+├── scripts/                       # Optional: scripts used in the process
+├── filter_multiallelic_by_freq.R  # R script to filter multiallelics by ALT_FREQ
+├── run_chr_pop_pipeline_imputedVarID..sh  # Main pipeline driver (chr1–22 + X)
+├── mergeChrBed.sh                 # Merge across chromosomes per population
+├── merged_genome/                 # Per-pop merged genome-wide PLINK files
+│   └── <POP>_genome.{bed,bim,fam,pgen,psam,pvar,afreq}
+├── merged_genome_ALL/             # ALL-population merged set from 5 superpops
+│   ├── ALL_genome.{bed,bim,fam,pgen,pvar,psam}
+│   └── ALL_genome_freq.afreq
+└── final_vcf_outputWithAfreq/     # Final AF-annotated VCF/BCF + QC reports
+    ├── 1kg_hg38_pos.txt           # Target variant list (CHROM POS REF ALT ID)
+    ├── with_popAF.vcf             # VCF with AF + population AFs
+    ├── with_popAF.bcf             # BCF version of the above
+    ├── with_popAF.log             # Harmonization + summary log
+    └── with_popAF_qc.tsv          # Detailed per-variant QC report
 ```
 
 ---
@@ -31,10 +41,13 @@ Built for high-performance computing environments using `plink2`, `bcftools`, R,
 
 Make sure the following tools are installed and available:
 
-- [`plink2`](https://www.cog-genomics.org/plink/2.0/)
-- [`bcftools`](https://samtools.github.io/bcftools/)
-- [`GNU parallel`](https://www.gnu.org/software/parallel/)
-- `R` with packages: `dplyr`, `readr`
+- `plink2`
+- `plink 1.9`
+- `bcftools`
+- `htslib` (bgzip + tabix)
+- `GNU parallel`
+- `R` (`dplyr`, `readr`)
+- `Python ≥ 3.8` (tested with 3.12)
 
 ---
 
@@ -114,6 +127,63 @@ Also verifies merge via allele frequency (`--freq`) per merged output.
 
 ---
 
+### 4. **Merge Across All Populations → ALL**
+
+Using the robust **union-merge** pipeline:
+
+- Deduplicates variant IDs
+- Harmonizes REF/ALT using AFR as base
+- Performs iterative PLINK 1.9 merge
+- Drops irreconcilable variants only when unavoidable
+- Writes final PGEN + `.afreq`
+
+Script:  
+`make_ALL.sh`
+
+Outputs in `merged_genome_ALL/`.
+
+---
+
+### 5. **Construct Final VCF With Per-Pop AFs**
+
+Script:
+
+```
+make_final_vcf.sh
+```
+
+Features:
+
+- Uses authoritative REF/ALT from `1kg_hg38_pos.txt`
+- Loads AF from ALL + 5 populations
+- Automatically:
+  - Detects exact allele match
+  - Detects REF/ALT swaps and flips AF (→ 1 - AF)
+  - Flags hard mismatches and sets AF=0
+- Produces:
+  - `with_popAF.vcf`
+  - `with_popAF_qc.tsv`
+  - `with_popAF.log`
+
+Fully HPC-safe and bcftools-compliant:
+
+```
+grep '^#' with_popAF.vcf > with_popAF.sorted.vcf
+grep -v '^#' with_popAF.vcf | LC_ALL=C sort -T /tmp -k1,1V -k2,2n >> with_popAF.sorted.vcf
+bgzip with_popAF.sorted.vcf
+tabix -p vcf with_popAF.sorted.vcf.gz
+
+bcftools view -Ob -o with_popAF.bcf with_popAF.sorted.vcf.gz
+bcftools index -f with_popAF.bcf
+```
+
+Outputs:
+
+- `with_popAF.bcf`
+- `with_popAF.bcf.csi`
+
+---
+
 ## 🧪 Validation
 
 After processing, each final PLINK file is validated using `plink2 --freq` to ensure integrity.
@@ -133,23 +203,25 @@ Each folder contains:
 - `EAS` – East Asian
 - `SAS` – South Asian
 - `AMR` – Admixed American
-
+- `ALL` – ALL populations
 ---
 
 ## 📄 Key Outputs
 
-| Folder              | Contents                                         |
-| ------------------- | ------------------------------------------------ |
-| `bedFiles_maf001/`  | Final PLINK files per chr/pop (`final_output.*`) |
-| `fltMultiallelics/` | BIM files with removed multiallelic variants     |
-| `fltUnMatchedRsID/` | BIM entries that could not be matched to rsID    |
-| `filterVar/`        | All unmatched entries not kept in final output   |
-| `merged_genome/`    | Per-population merged genome-wide PLINK files    |
+| Folder                      | Contents                                         |
+| --------------------------- | ------------------------------------------------ |
+| `bedFiles_maf001/`          | Final PLINK files per chr/pop (`final_output.*`) |
+| `fltMultiallelics/`         | BIM files with removed multiallelic variants     |
+| `fltUnMatchedRsID/`         | BIM entries that could not be matched to rsID    |
+| `filterVar/`                | All unmatched entries not kept in final output   |
+| `merged_genome/`            | Per-population merged genome-wide PLINK files    |
+| `merged_genome_ALL/`        | ALL-population merged genome-wide PLINK files    |
+| `final_vcf_outputWithAfreq/`| Allele(ALT) freqency vcf/sorted vcf/sorted bcf   |
 
 ---
 
 
-## 👎 Notes
+## Notes
 
 - 1000G vcfs differs from the common multiallelic representation (e.g., using commas ',' to separate ALT alleles), which can be easily overlooked during processing:
   - SNVs and INDELs were phased in SHAPEIT2-duohmm, which does not handle multiallelic variant
@@ -174,5 +246,5 @@ If this pipeline helps your work, please cite:
 ## 👨‍💻 Maintainer
 
 **Xiaoyang Dai**\
-📧 [xd14188@bristol.ac.uk](mailto\:xd14188@bristol.ac.uk)
+📧 [x.dai@bristol.ac.uk](mailto\:x.dai@bristol.ac.uk)
 
